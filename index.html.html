@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>I have a question for you 🌸</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #fff5f8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+  .page {
+    display: none;
+    min-height: 100vh;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    animation: fadeIn 0.6s ease;
+  }
+  .page.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  @keyframes heartPop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.3); } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+  .emoji-big { font-size: 72px; margin-bottom: 1.2rem; animation: float 2.5s ease-in-out infinite; display: block; }
+  h1 { font-size: 28px; font-weight: 600; color: #2d1b2e; margin-bottom: 0.6rem; }
+  p.sub { font-size: 16px; color: #7a4f6d; margin-bottom: 1.8rem; line-height: 1.6; max-width: 360px; }
+
+  .btn {
+    padding: 13px 36px;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:active { transform: scale(0.96) !important; }
+  .btn-yes {
+    background: linear-gradient(135deg, #e8607a, #c94070);
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(201,64,112,0.35);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .btn-yes:hover { box-shadow: 0 6px 24px rgba(201,64,112,0.5); transform: scale(1.05); }
+  .btn-no {
+    background: #f0e6ed;
+    color: #9b6080;
+    border: 1.5px solid #ddbdd0;
+    position: fixed;
+    z-index: 10;
+    transition: none;
+  }
+
+  .btn-row { display: flex; gap: 16px; align-items: center; justify-content: center; flex-wrap: wrap; min-height: 60px; width: 100%; }
+
+  .hearts { display: flex; gap: 10px; font-size: 32px; margin-bottom: 1rem; }
+  .hearts span { animation: heartPop 0.4s ease backwards; }
+  .hearts span:nth-child(1) { animation-delay: 0s; }
+  .hearts span:nth-child(2) { animation-delay: 0.12s; }
+  .hearts span:nth-child(3) { animation-delay: 0.24s; }
+
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(180,80,120,0.12);
+    padding: 2rem 2.5rem;
+    max-width: 420px;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .label { font-size: 13px; color: #9b6080; margin-bottom: 5px; text-align: left; font-weight: 500; }
+  .field-wrap { margin-bottom: 14px; }
+  input[type="text"], input[type="date"], select {
+    width: 100%;
+    padding: 11px 16px;
+    border: 1.5px solid #e2c8d8;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #2d1b2e;
+    background: #fff8fb;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus { border-color: #e8607a; background: #fff; }
+
+  .step-dots { display: flex; gap: 8px; margin-bottom: 1.8rem; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #f0d0e0; transition: background 0.3s; }
+  .dot.active { background: #e8607a; }
+
+  .tag {
+    display: inline-block;
+    background: #fce8f1;
+    color: #b03060;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 4px;
+  }
+
+  .confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; overflow: hidden; }
+  .confetti-piece { position: absolute; animation: confetti-fall linear forwards; }
+
+  .hint {
+    font-size: 13px;
+    color: #b07090;
+    margin-top: 14px;
+    min-height: 20px;
+    font-style: italic;
+  }
+
+  .bg-deco {
+    position: fixed; pointer-events: none; z-index: 0;
+    font-size: 40px; opacity: 0.12; user-select: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- background decorations -->
+<span class="bg-deco" style="top:5%;left:5%">🌸</span>
+<span class="bg-deco" style="top:12%;right:8%">💕</span>
+<span class="bg-deco" style="bottom:10%;left:8%">🌹</span>
+<span class="bg-deco" style="bottom:6%;right:6%">✨</span>
+<span class="bg-deco" style="top:45%;left:2%">💌</span>
+<span class="bg-deco" style="top:40%;right:3%">🌷</span>
+
+<div class="confetti-container" id="confetti-container"></div>
+
+<!-- PAGE 1: Intro -->
+<div id="page1" class="page active" style="position:relative;z-index:1;">
+  <div class="step-dots">
+    <div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <span class="emoji-big">🌸</span>
+  <h1>Hey, can I ask you something?</h1>
+  <p class="sub">Close your eyes for a second...<br>okay now open them 🥺<br>I have a tiny little question for you.</p>
+  <button class="btn btn-yes" onclick="goTo('page2')">Okay, what is it? →</button>
+</div>
+
+<!-- PAGE 2: The Ask -->
+<div id="page2" class="page" style="position:relative;z-index:1;">
+  <div class="step-dots">
+    <div class="dot"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <span class="emoji-big">💌</span>
+  <h1>Will you go on a date with me?</h1>
+  <p class="sub">I promise it'll be fun, memorable,<br>and I'll be on my absolute best behaviour 🤞</p>
+  <div class="btn-row" id="btn-row">
+    <button class="btn btn-yes" id="yes-btn" onclick="sayYes()">Yes! 💖</button>
+    <button class="btn btn-no" id="no-btn" onclick="runAway()">No 😔</button>
+  </div>
+  <p class="hint" id="no-hint"></p>
+</div>
+
+<!-- PAGE 3: Details -->
+<div id="page3" class="page" style="position:relative;z-index:1;">
+  <div class="step-dots">
+    <div class="dot"></div><div class="dot"></div><div class="dot active"></div><div class="dot"></div>
+  </div>
+  <div class="hearts"><span>💗</span><span>💕</span><span>💓</span></div>
+  <h1>She said YES! 🎉</h1>
+  <p class="sub">Amazing! Now tell me — when are you free?<br>Pick a day and time that works for you ✨</p>
+  <div class="card">
+    <div class="field-wrap">
+      <div class="label">What day works for you?</div>
+      <input type="date" id="date-input" />
+    </div>
+    <div class="field-wrap">
+      <div class="label">What time? (morning, evening...)</div>
+      <input type="text" id="time-input" placeholder="e.g. 7pm, Saturday evening..." />
+    </div>
+    <div class="field-wrap">
+      <div class="label">Any place or vibe in mind? (optional)</div>
+      <input type="text" id="place-input" placeholder="e.g. coffee, dinner, walk in the park..." />
+    </div>
+    <button class="btn btn-yes" style="width:100%;margin-top:4px;" onclick="submitDetails()">Let's plan it! 🗓️</button>
+  </div>
+</div>
+
+<!-- PAGE 4: Confirmed -->
+<div id="page4" class="page" style="position:relative;z-index:1;">
+  <div class="step-dots">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot active"></div>
+  </div>
+  <span class="emoji-big">🥂</span>
+  <h1>It's a date! 💖</h1>
+  <p class="sub">He's been notified — get ready for something really special 💫</p>
+  <div class="card" style="margin-top:0;">
+    <p style="font-size:14px;color:#9b6080;margin-bottom:12px;">Here's what you told him:</p>
+    <div id="summary-tags"></div>
+    <p style="font-size:13px;color:#c47090;margin-top:16px;font-style:italic;">Can't wait to see you 🌹</p>
+  </div>
+</div>
+
+<script>
+  const noBtn = document.getElementById('no-btn');
+  let noClickCount = 0;
+  let noBtnInitialized = false;
+
+  function goTo(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    if (pageId === 'page2') initNoBtn();
+  }
+
+  function initNoBtn() {
+    if (noBtnInitialized) return;
+    noBtnInitialized = true;
+    const yesBtn = document.getElementById('yes-btn');
+    const rect = yesBtn.getBoundingClientRect();
+    noBtn.style.top = rect.top + 'px';
+    noBtn.style.left = (rect.right + 20) + 'px';
+    noBtn.style.width = '110px';
+    noBtn.style.height = '46px';
+  }
+
+  function runAway() {
+    noClickCount++;
+    const btnW = noBtn.offsetWidth;
+    const btnH = noBtn.offsetHeight;
+    const margin = 20;
+    const maxX = window.innerWidth - btnW - margin;
+    const maxY = window.innerHeight - btnH - margin;
+    const x = Math.floor(Math.random() * maxX) + margin;
+    const y = Math.floor(Math.random() * maxY) + margin;
+    noBtn.style.left = x + 'px';
+    noBtn.style.top = y + 'px';
+    noBtn.style.transform = 'rotate(' + (Math.random() * 30 - 15) + 'deg)';
+    const hints = [
+      "Hmm, the No button seems a bit shy 👀",
+      "It really doesn't want to be clicked 😅",
+      "The No button is literally running away from you...",
+      "Okay it's clearly escaping... maybe just say yes? 🥺",
+      "The No button has left the building 😂",
+      "It's hiding! Just click Yes, it's better anyway 💖"
+    ];
+    document.getElementById('no-hint').textContent = hints[Math.min(noClickCount - 1, hints.length - 1)];
+  }
+
+  function sayYes() {
+    noBtn.style.display = 'none';
+    launchConfetti();
+    setTimeout(() => goTo('page3'), 500);
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('date-input').min = today;
+  }
+
+  function launchConfetti() {
+    const colors = ['#e8607a','#f4b8cc','#afa9ec','#9fe1cb','#fac775','#85b7eb','#f0d0e0'];
+    const container = document.getElementById('confetti-container');
+    container.innerHTML = '';
+    for (let i = 0; i < 80; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = '-20px';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      const size = 6 + Math.random() * 10;
+      el.style.width = size + 'px';
+      el.style.height = size + 'px';
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
+      el.style.animationDuration = (1.8 + Math.random() * 2.2) + 's';
+      el.style.animationDelay = Math.random() * 1.2 + 's';
+      container.appendChild(el);
+    }
+    setTimeout(() => container.innerHTML = '', 5000);
+  }
+
+  function submitDetails() {
+    const dateVal = document.getElementById('date-input').value;
+    const timeVal = document.getElementById('time-input').value.trim();
+    const placeVal = document.getElementById('place-input').value.trim();
+    if (!dateVal && !timeVal) {
+      document.getElementById('time-input').style.borderColor = '#e8607a';
+      document.getElementById('time-input').focus();
+      return;
+    }
+    let dateStr = '';
+    if (dateVal) {
+      const d = new Date(dateVal + 'T00:00:00');
+      dateStr = d.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    const tags = document.getElementById('summary-tags');
+    tags.innerHTML = '';
+    if (dateStr) tags.innerHTML += '<span class="tag">📅 ' + dateStr + '</span>';
+    if (timeVal) tags.innerHTML += '<span class="tag">🕐 ' + timeVal + '</span>';
+    if (placeVal) tags.innerHTML += '<span class="tag">📍 ' + placeVal + '</span>';
+    if (!tags.innerHTML) tags.innerHTML = '<span class="tag">Details coming soon!</span>';
+
+    launchConfetti();
+
+    // Log to console so you can see it (open with F12)
+    console.log('%c💌 DATE CONFIRMED!', 'color:#e8607a;font-size:18px;font-weight:bold;');
+    console.log('📅 Date:', dateStr || 'TBD');
+    console.log('🕐 Time:', timeVal || 'TBD');
+    console.log('📍 Place:', placeVal || 'TBD');
+
+    setTimeout(() => goTo('page4'), 500);
+  }
+</script>
+</body>
+</html>
